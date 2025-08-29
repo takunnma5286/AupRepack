@@ -121,79 +121,13 @@
     <value>参照</value>
   </data>
   <data name="MainWindow_AupHeader" xml:space="preserve">
-    <value>編集するaupファイル (バックアップ推奨)</value>
+    <value>再梱包するaupファイル (バックアップ推奨)</value>
   </data>
   <data name="MainWindow_AupPath" xml:space="preserve">
     <value>パス</value>
   </data>
-  <data name="MainWindow_EditorButton" xml:space="preserve">
-    <value>参照</value>
-  </data>
-  <data name="MainWindow_EditorHeader" xml:space="preserve">
-    <value>編集するアプリケーション</value>
-  </data>
-  <data name="MainWindow_EditorPath" xml:space="preserve">
-    <value>パス</value>
-  </data>
-  <data name="MainWindow_FilterHeader" xml:space="preserve">
-    <value>フィルタ</value>
-  </data>
-  <data name="MainWindow_FilterEnableVideo" xml:space="preserve">
-    <value>動画ファイル</value>
-  </data>
-  <data name="MainWindow_FilterEnableBorder" xml:space="preserve">
-    <value>縁取り</value>
-  </data>
-  <data name="MainWindow_FilterEnableDisplacement" xml:space="preserve">
-    <value>ディスプレイスメントマップ</value>
-  </data>
-  <data name="MainWindow_FilterEnableFigure" xml:space="preserve">
-    <value>図形</value>
-  </data>
-  <data name="MainWindow_FilterEnableMask" xml:space="preserve">
-    <value>マスク</value>
-  </data>
-  <data name="MainWindow_FilterEnablePartialFilter" xml:space="preserve">
-    <value>部分フィルタ</value>
-  </data>
-  <data name="MainWindow_FilterEnablePsdToolKit" xml:space="preserve">
-    <value>PSDToolKit</value>
-  </data>
-  <data name="MainWindow_FilterEnableWaveform" xml:space="preserve">
-    <value>音声波形表示</value>
-  </data>
-  <data name="MainWindow_FilterEnableShadow" xml:space="preserve">
-    <value>シャドー</value>
-  </data>
-  <data name="MainWindow_FilterEnableScript" xml:space="preserve">
-    <value>スクリプト</value>
-  </data>
-  <data name="MainWindow_FilterEnableAudio" xml:space="preserve">
-    <value>音声ファイル</value>
-  </data>
-  <data name="MainWindow_FilterEnableImage" xml:space="preserve">
-    <value>画像ファイル</value>
-  </data>
-  <data name="MainWindow_FilterEnableVideoComposition" xml:space="preserve">
-    <value>動画ファイル合成</value>
-  </data>
-  <data name="MainWindow_FilterEnableImageComposition" xml:space="preserve">
-    <value>画像ファイル合成</value>
-  </data>
-  <data name="VersionWindow_Title" xml:space="preserve">
-    <value>AupRename について</value>
-  </data>
   <data name="MainWindow_ButtonNewEdit" xml:space="preserve">
-    <value>新規編集</value>
-  </data>
-  <data name="MainWindow_ButtonReEdit" xml:space="preserve">
-    <value>再編集</value>
-  </data>
-  <data name="MainWindow_ButtonApply" xml:space="preserve">
-    <value>適用</value>
-  </data>
-  <data name="MainWindow_ButtonRevert" xml:space="preserve">
-    <value>元に戻す</value>
+    <value>再梱包</value>
   </data>
   <data name="MainWindow_Menu_File" xml:space="preserve">
     <value>ファイル(_F)</value>
@@ -214,19 +148,10 @@
     <value>編集(_E)</value>
   </data>
   <data name="MainWindow_Menu_NewEdit" xml:space="preserve">
-    <value>新規編集(_N)</value>
-  </data>
-  <data name="MainWindow_Menu_ReEdit" xml:space="preserve">
-    <value>再編集(_R)</value>
-  </data>
-  <data name="MainWindow_Menu_Apply" xml:space="preserve">
-    <value>適用(_A)</value>
+    <value>再梱包(_P)</value>
   </data>
   <data name="MainWindow_Menu_About" xml:space="preserve">
     <value>AupRename について(_V)</value>
-  </data>
-  <data name="MainWindow_Menu_Revert" xml:space="preserve">
-    <value>元に戻す(_U)</value>
   </data>
   <data name="MainWindow_Menu_Open" xml:space="preserve">
     <value>開く(_O)</value>
@@ -234,48 +159,21 @@
   <data name="MainWindow_Menu_Quit" xml:space="preserve">
     <value>終了(_X)</value>
   </data>
-  <data name="Error_EditorNotSelected" xml:space="preserve">
-    <value>テキストエディタを指定してください。</value>
-  </data>
   <data name="Error_ExEditNotFound" xml:space="preserve">
     <value>拡張編集のデータが見つかりません。</value>
   </data>
   <data name="Error_FileNotFound" xml:space="preserve">
     <value>ファイルが見つかりません。</value>
   </data>
-  <data name="Error_ListTxtNotFound" xml:space="preserve">
-    <value>list.txt が見つかりません。
-新規編集からやり直してください。</value>
-  </data>
-  <data name="Error_EditorNotFound" xml:space="preserve">
-    <value>テキストエディタが見つかりません。</value>
-  </data>
   <data name="Error_NotAviUtlProjectFile" xml:space="preserve">
     <value>AviUtlプロジェクトファイルではありません。</value>
-  </data>
-  <data name="Error_NoFileOpen" xml:space="preserve">
-    <value>ファイルを開いていません。
-新規編集してください。</value>
   </data>
   <data name="Error_CorruptedAviUtlProjectFile" xml:space="preserve">
     <value>AviUtlプロジェクトファイル読み込み中にエラーが発生しました。
 ファイルが破損している可能性があります。</value>
   </data>
-  <data name="Error_CannotWriteListTxt" xml:space="preserve">
-    <value>list.txt に書き込めません。
-既にテキストエディタで開いている場合は閉じてください。</value>
-  </data>
   <data name="Message_NoFilesToEdit" xml:space="preserve">
-    <value>編集するファイルがありません。</value>
-  </data>
-  <data name="Status_OpenEditor" xml:space="preserve">
-    <value>{0} を編集中</value>
-  </data>
-  <data name="Status_RenameCompleted" xml:space="preserve">
-    <value>{0} に変更を適用</value>
-  </data>
-  <data name="Status_RevertCompleted" xml:space="preserve">
-    <value>{0} の変更をリセット</value>
+    <value>再梱包するファイルがありません。</value>
   </data>
   <data name="Error_FileNameTooLong" xml:space="preserve">
     <value>{0}行目のファイル名が長すぎます。</value>
@@ -283,31 +181,11 @@
   <data name="Error_WriteFailed" xml:space="preserve">
     <value>書き込みに失敗しました。</value>
   </data>
-  <data name="Message_RenameCompleted" xml:space="preserve">
-    <value>リネームが完了しました。</value>
-  </data>
-  <data name="Message_RevertCompleted" xml:space="preserve">
-    <value>変更を元に戻しました。</value>
-  </data>
-  <data name="Error_TooManyFilenames" xml:space="preserve">
-    <value>ファイル名が多すぎます。
-list.txt の行数を増やさないでください。</value>
-  </data>
-  <data name="Error_TooFewFilenames" xml:space="preserve">
-    <value>ファイル名が少なすぎます。
-list.txt の行数を減らさないでください。</value>
-  </data>
   <data name="Error_LogWriteFailed" xml:space="preserve">
     <value>エラーログの書き込みに失敗しました。：</value>
   </data>
   <data name="Dialog_AupTitle" xml:space="preserve">
     <value>AviUtlプロジェクトファイルを選択してください</value>
-  </data>
-  <data name="Dialog_EditorTitle" xml:space="preserve">
-    <value>AviUtlプロジェクトファイルを選択してください</value>
-  </data>
-  <data name="Dialog_EditorFilter" xml:space="preserve">
-    <value>プログラム (*.exe)|*.exe|全てのファイル (*.*)|*.*</value>
   </data>
   <data name="Dialog_AupFilter" xml:space="preserve">
     <value>AviUtlプロジェクトファイル (*.aup)|*.aup|全てのファイル (*.*)|*.*</value>

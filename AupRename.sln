@@ -3,9 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AupRename", "AupRename\AupRename.csproj", "{A2F6F108-5053-46E9-9900-CC70D3986CDE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AupRename.Tests", "AupRename.Tests\AupRename.Tests.csproj", "{F67479CC-9538-46EE-A8CF-4A87B4CE3F7F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AupRepack", "AupRename\AupRepack.csproj", "{A2F6F108-5053-46E9-9900-CC70D3986CDE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

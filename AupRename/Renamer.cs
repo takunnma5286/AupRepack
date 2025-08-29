@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows;
+using System.Windows.Forms;
 using AupRename.RenameItems;
 using Karoterra.AupDotNet;
 using Karoterra.AupDotNet.ExEdit;
@@ -15,10 +16,7 @@ namespace AupRename
 {
     public class Renamer
     {
-        private const string ListFilename = @".\list.txt";
-
         public string Filename { get; set; } = "";
-        public string Editor { get; set; } = "";
 
         public bool EnableVideo { get; set; }
         public bool EnableImage { get; set; }
@@ -37,58 +35,40 @@ namespace AupRename
 
         public string Status { get; set; } = "";
 
-        public bool IsEditing => _aup != null;
-
-        private string CurrentFilename = "";
-        private AviUtlProject? _aup;
-        private ExEditProject? _exedit;
-        private PsdToolKitProject? _psdToolKit;
-        private readonly List<IRenameItem> _renameItems = [];
-
-        private void OpenEditor()
+        public void RepackProject()
         {
-            try
-            {
-                Process.Start(Editor, ListFilename);
-            }
-            catch (InvalidOperationException)
-            {
-                ShowError(Properties.Resources.Error_EditorNotSelected);
-                return;
-            }
-            catch (System.ComponentModel.Win32Exception)
-            {
-                ShowError(Properties.Resources.Error_EditorNotFound);
-                return;
-            }
-            Status = string.Format(Properties.Resources.Status_OpenEditor, Path.GetFileName(CurrentFilename));
-        }
-
-        public void NewEdit()
-        {
-            CurrentFilename = Filename;
-            _aup = null;
-            _exedit = null;
-            _psdToolKit = null;
-            _renameItems.Clear();
-            Status = "";
-
             if (!File.Exists(Filename))
             {
                 ShowError(Properties.Resources.Error_FileNotFound);
                 return;
             }
 
-            try
+            using var dialog = new FolderBrowserDialog
             {
-                _aup = new AviUtlProject(CurrentFilename);
-            }
-            catch (FileFormatException)
+                Description = "コピー先のフォルダーを選択してください",
+                ShowNewFolderButton = true,
+            };
+            if (dialog.ShowDialog() != DialogResult.OK)
             {
-                ShowError(Properties.Resources.Error_NotAviUtlProjectFile);
                 return;
             }
-            catch (EndOfStreamException)
+
+            ExtractAndRepack(dialog.SelectedPath);
+        }
+
+        private void ExtractAndRepack(string destDir)
+        {
+            AviUtlProject? aup;
+            ExEditProject? exedit;
+            PsdToolKitProject? psdToolKit;
+            var renameItems = new List<IRenameItem>();
+            Status = "";
+
+            try
+            {
+                aup = new AviUtlProject(Filename);
+            }
+            catch (Exception ex) when (ex is FileFormatException or EndOfStreamException)
             {
                 ShowError(Properties.Resources.Error_NotAviUtlProjectFile);
                 return;
@@ -100,29 +80,29 @@ namespace AupRename
                 return;
             }
 
-            _exedit = null;
-            _psdToolKit = null;
             try
             {
-                for (int i = 0; i < _aup.FilterProjects.Count; i++)
+                exedit = null;
+                psdToolKit = null;
+                for (int i = 0; i < aup.FilterProjects.Count; i++)
                 {
-                    if (_aup.FilterProjects[i] is RawFilterProject filter)
+                    if (aup.FilterProjects[i] is RawFilterProject filter)
                     {
                         if (filter.Name == "拡張編集")
                         {
-                            _exedit = new ExEditProject(filter);
-                            _aup.FilterProjects[i] = _exedit;
+                            exedit = new ExEditProject(filter);
+                            aup.FilterProjects[i] = exedit;
                         }
                         else if (filter.Name == "Advanced Editing")
                         {
-                            _exedit = new EnglishExEditProject(filter);
-                            _aup.FilterProjects[i] = _exedit;
+                            exedit = new EnglishExEditProject(filter);
+                            aup.FilterProjects[i] = exedit;
                         }
                     }
-                    if (_aup.FilterProjects[i].Name == "PSDToolKit")
+                    if (aup.FilterProjects[i].Name == "PSDToolKit")
                     {
-                        _psdToolKit = new PsdToolKitProject(_aup.FilterProjects[i]);
-                        _aup.FilterProjects[i] = _psdToolKit;
+                        psdToolKit = new PsdToolKitProject(aup.FilterProjects[i]);
+                        aup.FilterProjects[i] = psdToolKit;
                     }
                 }
             }
@@ -130,23 +110,18 @@ namespace AupRename
             {
                 ShowError(Properties.Resources.Error_CorruptedAviUtlProjectFile);
                 LogException(ex);
-                _exedit = null;
-                _aup = null;
                 return;
             }
 
-            if (_exedit == null)
+            if (exedit == null)
             {
                 ShowError(Properties.Resources.Error_ExEditNotFound);
-                _aup = null;
                 return;
             }
 
-            _renameItems.Clear();
-            // 拡張編集
-            for (int objIdx = 0; objIdx < _exedit.Objects.Count; objIdx++)
+            for (int objIdx = 0; objIdx < exedit.Objects.Count; objIdx++)
             {
-                var obj = _exedit.Objects[objIdx];
+                var obj = exedit.Objects[objIdx];
                 if (obj.Chain) continue;
 
                 for (int effectIdx = 0; effectIdx < obj.Effects.Count; effectIdx++)
@@ -155,228 +130,181 @@ namespace AupRename
                     IRenameItem? renameItem = null;
                     if(EnableVideo && (renameItem = VideoFileRenameItem.CreateIfTarget(effect)) != null)
                     {
-                        _renameItems.Add(renameItem);
+                        renameItems.Add(renameItem);
                     }
                     else if (EnableImage && (renameItem = ImageFileRenameItem.CreateIfTarget(effect)) != null)
                     {
-                        _renameItems.Add(renameItem);
+                        renameItems.Add(renameItem);
                     }
                     else if (EnableAudio && (renameItem = AudioFileRenameItem.CreateIfTarget(effect)) != null)
                     {
-                        _renameItems.Add(renameItem);
+                        renameItems.Add(renameItem);
                     }
                     else if (EnableWaveform && (renameItem = WaveformRenameItem.CreateIfTarget(effect)) != null)
                     {
-                        _renameItems.Add(renameItem);
+                        renameItems.Add(renameItem);
                     }
                     else if (EnableShadow && (renameItem = ShadowRenameItem.CreateIfTarget(effect)) != null)
                     {
-                        _renameItems.Add(renameItem);
+                        renameItems.Add(renameItem);
                     }
                     else if (EnableBorder && (renameItem = BorderRenameItem.CreateIfTarget(effect)) != null)
                     {
-                        _renameItems.Add(renameItem);
+                        renameItems.Add(renameItem);
                     }
                     else if (EnableVideoComposition && (renameItem = VideoCompositionRenameItem.CreateIfTarget(effect)) != null)
                     {
-                        _renameItems.Add(renameItem);
+                        renameItems.Add(renameItem);
                     }
                     else if (EnableImageComposition && (renameItem = ImageCompositionRenameItem.CreateIfTarget(effect)) != null)
                     {
-                        _renameItems.Add(renameItem);
+                        renameItems.Add(renameItem);
                     }
                     else if (EnableFigure && (renameItem = FigureRenameItem.CreateIfTarget(effect)) != null)
                     {
-                        _renameItems.Add(renameItem);
+                        renameItems.Add(renameItem);
                     }
                     else if (EnableMask && (renameItem = MaskRenameItem.CreateIfTarget(effect)) != null)
                     {
-                        _renameItems.Add(renameItem);
+                        renameItems.Add(renameItem);
                     }
                     else if (EnableDisplacement && (renameItem = DisplacementRenameItem.CreateIfTarget(effect)) != null)
                     {
-                        _renameItems.Add(renameItem);
+                        renameItems.Add(renameItem);
                     }
                     else if (EnablePartialFilter && (renameItem = PartialFilterRenameItem.CreateIfTarget(effect)) != null)
                     {
-                        _renameItems.Add(renameItem);
+                        renameItems.Add(renameItem);
                     }
                     else if (EnableScript && (renameItem = ScriptFileRenameItem.CreateIfTarget(effect)) != null)
                     {
-                        _renameItems.Add(renameItem);
+                        renameItems.Add(renameItem);
                     }
                 }
             }
-            // PSDToolKit
-            if (_psdToolKit != null && EnablePsdToolKit)
+            if (psdToolKit != null && EnablePsdToolKit)
             {
-                foreach (var psdImage in _psdToolKit.Images)
+                foreach (var psdImage in psdToolKit.Images)
                 {
-                    _renameItems.Add(new PsdRenameItem(psdImage, _exedit.Objects));
+                    renameItems.Add(new PsdRenameItem(psdImage, exedit.Objects));
                 }
             }
 
-            if (_renameItems.Count == 0)
+            if (renameItems.Count == 0)
             {
                 ShowInfo(Properties.Resources.Message_NoFilesToEdit);
-                _aup = null;
-                _exedit = null;
                 return;
             }
 
-            try
+            var newNames = new Dictionary<string, string>();
+            var aupDir = Path.GetDirectoryName(Filename);
+            if (string.IsNullOrEmpty(aupDir))
             {
-                using StreamWriter sw = new(ListFilename, false, Encoding.UTF8);
-                foreach (var item in _renameItems)
+                ShowError("プロジェクトファイルのフォルダーを取得できませんでした。");
+                return;
+            }
+
+            var copiedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var item in renameItems)
+            {
+                if (newNames.TryGetValue(item.OldName, out var existingNewName))
                 {
-                    sw.WriteLine(item.OldName);
+                    try
+                    {
+                        item.Rename(existingNewName);
+                    }
+                    catch (MaxByteCountOfStringException)
+                    {
+                        ShowError($"ファイル名が長すぎます: {existingNewName}");
+                        return;
+                    }
+                    continue;
                 }
-            }
-            catch (IOException)
-            {
-                ShowError(Properties.Resources.Error_CannotWriteListTxt);
-                _aup = null;
-                _exedit = null;
-                _renameItems.Clear();
-                return;
-            }
 
-            OpenEditor();
-        }
+                string srcPath;
+                if (Path.IsPathRooted(item.OldName))
+                {
+                    srcPath = item.OldName;
+                }
+                else
+                {
+                    srcPath = Path.Combine(aupDir, item.OldName);
+                }
+                srcPath = Path.GetFullPath(srcPath);
 
-        public void ReEdit()
-        {
-            if (_aup == null)
-            {
-                ShowError(Properties.Resources.Error_NoFileOpen);
-                return;
-            }
-            OpenEditor();
-        }
+                var newFileName = Path.GetFileName(srcPath);
+                var destPath = Path.Combine(destDir, newFileName);
 
-        private void Rename(List<string> newNames)
-        {
-            if (_aup == null || _exedit == null)
-            {
-                ShowError(Properties.Resources.Error_NoFileOpen);
-                return;
-            }
+                if (!copiedFiles.Contains(srcPath))
+                {
+                    if (File.Exists(srcPath))
+                    {
+                        try
+                        {
+                            File.Copy(srcPath, destPath, true);
+                            copiedFiles.Add(srcPath);
+                        }
+                        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException)
+                        {
+                            ShowError($"ファイルのコピーに失敗しました: {item.OldName} -> {destPath} - {ex.Message}");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        newNames[item.OldName] = item.OldName;
+                        try
+                        {
+                            item.Rename(item.OldName);
+                        }
+                        catch (MaxByteCountOfStringException)
+                        {
+                            ShowError($"ファイル名が長すぎます: {item.OldName}");
+                            return;
+                        }
+                        continue;
+                    }
+                }
+                
+                var newRelativePath = newFileName;
+                newNames[item.OldName] = newRelativePath;
 
-            for (int i = 0; i < _renameItems.Count; i++)
-            {
                 try
                 {
-                    _renameItems[i].Rename(newNames[i]);
+                    item.Rename(newRelativePath);
                 }
                 catch (MaxByteCountOfStringException)
                 {
-                    ShowError(string.Format(Properties.Resources.Error_FileNameTooLong, i + 1));
+                    ShowError($"ファイル名が長すぎます: {newRelativePath}");
                     return;
                 }
             }
 
+            var newAupPath = Path.Combine(destDir, Path.GetFileName(Filename));
             try
             {
-                using BinaryWriter writer = new(File.Create(CurrentFilename));
-                _aup.Write(writer);
+                using BinaryWriter writer = new(File.Create(newAupPath));
+                aup.Write(writer);
             }
-            catch (IOException)
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
-                ShowError(Properties.Resources.Error_WriteFailed);
-                return;
-            }
-            catch (UnauthorizedAccessException)
-            {
-                ShowError(Properties.Resources.Error_WriteFailed);
+                ShowError($"プロジェクトファイルの書き込みに失敗しました: {newAupPath} - {ex.Message}");
                 return;
             }
 
-            ShowInfo(Properties.Resources.Message_RenameCompleted);
-            Status = string.Format(Properties.Resources.Status_RenameCompleted, Path.GetFileName(CurrentFilename));
-        }
-
-        public void Apply()
-        {
-            if (_renameItems.Count == 0)
-            {
-                ShowError(Properties.Resources.Error_NoFileOpen);
-                return;
-            }
-
-            List<string> newNames = [];
-            try
-            {
-                using StreamReader sr = new(ListFilename, Encoding.UTF8);
-                string? line;
-                while ((line = sr.ReadLine()) != null)
-                {
-                    if (line.Length > 0)
-                    {
-                        newNames.Add(line);
-                    }
-                }
-            }
-            catch (FileNotFoundException)
-            {
-                ShowError(Properties.Resources.Error_ListTxtNotFound);
-                return;
-            }
-
-            if (newNames.Count > _renameItems.Count)
-            {
-                ShowError(Properties.Resources.Error_TooManyFilenames);
-                return;
-            }
-            else if (newNames.Count < _renameItems.Count)
-            {
-                ShowError(Properties.Resources.Error_TooFewFilenames);
-                return;
-            }
-
-            Rename(newNames);
-        }
-
-        public void Revert()
-        {
-            if (_aup == null || _renameItems.Count == 0)
-            {
-                ShowError(Properties.Resources.Error_NoFileOpen);
-                return;
-            }
-
-            foreach (var item in _renameItems)
-            {
-                item.Revert();
-            }
-
-            try
-            {
-                using BinaryWriter writer = new(File.Create(CurrentFilename));
-                _aup.Write(writer);
-            }
-            catch (IOException)
-            {
-                ShowError(Properties.Resources.Error_WriteFailed);
-                return;
-            }
-            catch (UnauthorizedAccessException)
-            {
-                ShowError(Properties.Resources.Error_WriteFailed);
-                return;
-            }
-
-            ShowInfo(Properties.Resources.Message_RevertCompleted);
-            Status = string.Format(Properties.Resources.Status_RevertCompleted, Path.GetFileName(CurrentFilename));
+            ShowInfo($"プロジェクトの再梱包が完了しました。");
+            Status = $"プロジェクトを {destDir} に再梱包しました。";
         }
 
         private static void ShowError(string message)
         {
-            MessageBox.Show(message, "AupRename", MessageBoxButton.OK, MessageBoxImage.Error);
+            System.Windows.MessageBox.Show(message, "AupRename", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         private static void ShowInfo(string message)
         {
-            MessageBox.Show(message, "AupRename", MessageBoxButton.OK, MessageBoxImage.Information);
+            System.Windows.MessageBox.Show(message, "AupRename", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private static void LogException(Exception ex)

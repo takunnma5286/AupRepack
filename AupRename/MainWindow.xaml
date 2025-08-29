@@ -6,12 +6,13 @@
         xmlns:local="clr-namespace:AupRename"
         xmlns:properties="clr-namespace:AupRename.Properties"
         mc:Ignorable="d"
-        Title="AupRename" Height="420" Width="420" AllowDrop="True" Drop="Window_Drop" PreviewDragOver="Window_PreviewDragOver" SizeToContent="Height" Closing="Window_Closing">
+        Title="AupRename" Height="164" Width="420" AllowDrop="True" Drop="Window_Drop" PreviewDragOver="Window_PreviewDragOver" SizeToContent="Height" Closing="Window_Closing">
     <Window.DataContext>
         <local:MainViewModel/>
     </Window.DataContext>
     <Window.InputBindings>
         <KeyBinding Command="{Binding OpenFileCommand}" Gesture="Ctrl+O"/>
+        <KeyBinding Command="{Binding RepackCommand}" Gesture="Ctrl+P"/>
     </Window.InputBindings>
     <Window.Resources>
         <local:LanguageEqualsConverter x:Key="LanguageEqualsConverter"/>
@@ -23,11 +24,8 @@
                 <Separator/>
                 <MenuItem Header="{x:Static properties:Resources.MainWindow_Menu_Quit}" Command="{Binding ShutdownCommand}" InputGestureText="Alt+F4"/>
             </MenuItem>
-            <MenuItem Header="{x:Static properties:Resources.MainWindow_Menu_Edit}">
-                <MenuItem Header="{x:Static properties:Resources.MainWindow_Menu_NewEdit}" Command="{Binding NewEditCommand}"/>
-                <MenuItem Header="{x:Static properties:Resources.MainWindow_Menu_ReEdit}" Command="{Binding ReEditCommand}"/>
-                <MenuItem Header="{x:Static properties:Resources.MainWindow_Menu_Apply}" Command="{Binding ApplyCommand}"/>
-                <MenuItem Header="{x:Static properties:Resources.MainWindow_Menu_Revert}" Command="{Binding RevertCommand}"/>
+            <MenuItem Header="{x:Static properties:Resources.MainWindow_Menu_Edit}" Click="MenuItem_Click">
+                <MenuItem Header="{x:Static properties:Resources.MainWindow_Menu_NewEdit}" Command="{Binding RepackCommand}" InputGestureText="Ctrl+P"/>
             </MenuItem>
             <MenuItem Header="{x:Static properties:Resources.MainWindow_Menu_Language}">
                 <MenuItem Header="{x:Static properties:Resources.MainWindow_Menu_Language_Default}"
@@ -80,46 +78,8 @@
                     <Button Content="{x:Static properties:Resources.MainWindow_AupButton}" VerticalAlignment="Center" HorizontalAlignment="Right" Width="40" Command="{Binding OpenFileCommand}"/>
                 </Grid>
             </GroupBox>
-            <GroupBox Header="{x:Static properties:Resources.MainWindow_EditorHeader}" Margin="0,5,0,0">
-                <Grid>
-                    <Label Content="{x:Static properties:Resources.MainWindow_EditorPath}" HorizontalAlignment="Left"/>
-                    <TextBox TextWrapping="Wrap" VerticalAlignment="Center" Margin="34,0,41,0" Text="{Binding Editor}"/>
-                    <Button Content="{x:Static properties:Resources.MainWindow_EditorButton}" VerticalAlignment="Center" HorizontalAlignment="Right" Width="40" Command="{Binding ReferEditorCommand}"/>
-                </Grid>
-            </GroupBox>
-            <GroupBox Header="{x:Static properties:Resources.MainWindow_FilterHeader}" Margin="0,5,0,0">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel>
-                        <CheckBox Content="{x:Static properties:Resources.MainWindow_FilterEnableVideo}" Margin="0,5,0,0" IsChecked="{Binding EnableVideo}"/>
-                        <CheckBox Content="{x:Static properties:Resources.MainWindow_FilterEnableImage}" Margin="0,5,0,0" IsChecked="{Binding EnableImage}"/>
-                        <CheckBox Content="{x:Static properties:Resources.MainWindow_FilterEnableAudio}" Margin="0,5,0,0" IsChecked="{Binding EnableAudio}"/>
-                        <CheckBox Content="{x:Static properties:Resources.MainWindow_FilterEnableWaveform}" Margin="0,5,0,0" IsChecked="{Binding EnableWaveform}"/>
-                        <CheckBox Content="{x:Static properties:Resources.MainWindow_FilterEnableShadow}" Margin="0,5,0,0" IsChecked="{Binding EnableShadow}"/>
-                        <CheckBox Content="{x:Static properties:Resources.MainWindow_FilterEnableBorder}" Margin="0,5,0,0" IsChecked="{Binding EnableBorder}"/>
-                        <CheckBox Content="{x:Static properties:Resources.MainWindow_FilterEnableVideoComposition}" Margin="0,5,0,0" IsChecked="{Binding EnableVideoComposition}"/>
-                        <CheckBox Content="{x:Static properties:Resources.MainWindow_FilterEnableImageComposition}" Margin="0,5,0,0" IsChecked="{Binding EnableImageComposition}"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="1">
-                        <CheckBox Content="{x:Static properties:Resources.MainWindow_FilterEnableFigure}" Margin="0,5,0,0" IsChecked="{Binding EnableFigure}"/>
-                        <CheckBox Content="{x:Static properties:Resources.MainWindow_FilterEnableMask}" Margin="0,5,0,0" IsChecked="{Binding EnableMask}"/>
-                        <CheckBox Content="{x:Static properties:Resources.MainWindow_FilterEnableDisplacement}" Margin="0,5,0,0" IsChecked="{Binding EnableDisplacement}"/>
-                        <CheckBox Content="{x:Static properties:Resources.MainWindow_FilterEnablePartialFilter}" Margin="0,5,0,0" IsChecked="{Binding EnablePartialFilter}"/>
-                        <Separator Margin="0,7,0,2"/>
-                        <CheckBox Content="{x:Static properties:Resources.MainWindow_FilterEnableScript}" Margin="0,5,0,0" IsChecked="{Binding EnableScript}"/>
-                        <Separator Margin="0,7,0,2"/>
-                        <CheckBox Content="{x:Static properties:Resources.MainWindow_FilterEnablePsdToolKit}" Margin="0,5,0,0" IsChecked="{Binding EnablePsdToolKit}"/>
-                    </StackPanel>
-                </Grid>
-            </GroupBox>
             <StackPanel VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,5,0,5" Orientation="Horizontal" FlowDirection="LeftToRight">
-                <Button Content="{x:Static properties:Resources.MainWindow_ButtonNewEdit}" Padding="12,1,12,1" Margin="0,0,12,0" Command="{Binding NewEditCommand}"/>
-                <Button Content="{x:Static properties:Resources.MainWindow_ButtonReEdit}" Padding="12,1,12,1" Margin="0,0,12,0" Command="{Binding ReEditCommand}"/>
-                <Button Content="{x:Static properties:Resources.MainWindow_ButtonApply}" Padding="12,1,12,1" Margin="0,0,12,0" Command="{Binding ApplyCommand}"/>
-                <Button Content="{x:Static properties:Resources.MainWindow_ButtonRevert}" Padding="12,1,12,1" Margin="0,0,12,0" Command="{Binding RevertCommand}"/>
+                <Button Content="{x:Static properties:Resources.MainWindow_ButtonNewEdit}" Padding="12,1,12,1" Margin="0,0,12,0" Command="{Binding RepackCommand}"/>
             </StackPanel>
         </StackPanel>
     </DockPanel>

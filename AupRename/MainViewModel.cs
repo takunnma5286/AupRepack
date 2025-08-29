@@ -16,11 +16,7 @@ namespace AupRename
         public readonly Renamer Renamer;
 
         public DelegateCommand OpenFileCommand { get; init; }
-        public DelegateCommand ReferEditorCommand { get; init; }
-        public DelegateCommand NewEditCommand { get; init; }
-        public DelegateCommand ReEditCommand { get; init; }
-        public DelegateCommand ApplyCommand { get; init; }
-        public DelegateCommand RevertCommand { get; init; }
+        public DelegateCommand RepackCommand { get; init; }
         public DelegateCommand OpenUrlCommand { get; init; }
         public DelegateCommand ShowVersionCommand { get; init; }
         public DelegateCommand ShutdownCommand { get; init; }
@@ -32,16 +28,6 @@ namespace AupRename
             set
             {
                 Renamer.Filename = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        public string Editor
-        {
-            get => Renamer.Editor;
-            set
-            {
-                Renamer.Editor = value;
                 RaisePropertyChanged();
             }
         }
@@ -198,23 +184,10 @@ namespace AupRename
         {
             Renamer = new Renamer();
             OpenFileCommand = new DelegateCommand(OpenFile);
-            ReferEditorCommand = new DelegateCommand(ReferEditor);
-            ReEditCommand = new DelegateCommand(
-                () => { Renamer.ReEdit(); RaisePropertyChanged(nameof(Status)); },
-                () => Renamer.IsEditing);
-            ApplyCommand = new DelegateCommand(
-                () => { Renamer.Apply(); RaisePropertyChanged(nameof(Status)); },
-                () => Renamer.IsEditing);
-            RevertCommand = new DelegateCommand(
-                () => { Renamer.Revert(); RaisePropertyChanged(nameof(Status)); },
-                () => Renamer.IsEditing);
-            NewEditCommand = new DelegateCommand(() =>
+            RepackCommand = new DelegateCommand(() =>
             {
-                Renamer.NewEdit();
+                Renamer.RepackProject();
                 RaisePropertyChanged(nameof(Status));
-                ReEditCommand.RaiseCanExecuteChanged();
-                ApplyCommand.RaiseCanExecuteChanged();
-                RevertCommand.RaiseCanExecuteChanged();
             });
             OpenUrlCommand = new DelegateCommand(OpenUrl);
             ShowVersionCommand = new DelegateCommand(ShowVersion);
@@ -237,19 +210,6 @@ namespace AupRename
             }
         }
 
-        private void ReferEditor()
-        {
-            OpenFileDialog dialog = new()
-            {
-                Title = Properties.Resources.Dialog_EditorTitle,
-                Filter = Properties.Resources.Dialog_EditorFilter,
-            };
-            if (dialog.ShowDialog() == true)
-            {
-                Editor = dialog.FileName;
-            }
-        }
-
         private void ShowVersion()
         {
             new VersionWindow().ShowDialog();
@@ -268,7 +228,7 @@ namespace AupRename
         private void ChangeLanguage(string? culture)
         {
             Language = culture ?? "";
-            MessageBox.Show(Properties.Resources.Message_ChangeLanguage, "AupRename", MessageBoxButton.OK, MessageBoxImage.Information);
+            System.Windows.MessageBox.Show(Properties.Resources.Message_ChangeLanguage, "AupRename", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         public void LoadSetting()
@@ -279,7 +239,6 @@ namespace AupRename
                 Properties.Settings.Default.IsUpgrade = true;
             }
 
-            Editor = Properties.Settings.Default.Editor;
             EnableVideo = Properties.Settings.Default.EnableVideo;
             EnableImage = Properties.Settings.Default.EnableImage;
             EnableAudio = Properties.Settings.Default.EnableAudio;
@@ -298,7 +257,6 @@ namespace AupRename
 
         public void SaveSetting()
         {
-            Properties.Settings.Default.Editor = Editor;
             Properties.Settings.Default.EnableVideo = EnableVideo;
             Properties.Settings.Default.EnableImage = EnableImage;
             Properties.Settings.Default.EnableAudio = EnableAudio;

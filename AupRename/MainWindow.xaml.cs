@@ -34,5 +34,10 @@ namespace AupRename
         {
             ((MainViewModel)DataContext).SaveSetting();
         }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
